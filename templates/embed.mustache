@@ -1,0 +1,20 @@
+{{!
+    @template filter_peertube/embed
+
+    Centered and responsive PeerTube iFrame embed.
+
+    Context variables:
+    * embedurl - The full embed URL of the PeerTube video.
+}}
+<!-- Outer wrapper to center the video alignment. -->
+<div style="text-align: center;">
+    <!-- Responsive container maintaining a 16:9 aspect ratio and fitting mobile screens. -->
+    <div style="position: relative; width: 100%; max-width: 640px; margin: 0 auto; aspect-ratio: 16 / 9;">
+        <!-- Iframe element embedding the video with secure sandbox permissions and fullscreen support. -->
+        <iframe style="border: 0px; position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                title="PeerTube Video" 
+                src="{{{embedurl}}}" 
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
+                allow="fullscreen"></iframe>
+    </div>
+</div>
