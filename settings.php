@@ -15,20 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Display Peertube filter settings
+ * Display PeerTube filter settings.
  *
  * @package    filter_peertube
- * @copyright  
+ * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-    $settings->add(new admin_setting_configtextarea(
-        'filter_peertube/allowedsources',
-            get_string('allowedsourceslist',
-            'filter_peertube'),
+    $settings->add(
+        new admin_setting_configtextarea(
+            'filter_peertube/allowedsources',
+            get_string('allowedsourceslist', 'filter_peertube'),
             get_string('allowedsourceslistdesc', 'filter_peertube'),
-            ''));
+            ''
+        )
+    );
 }

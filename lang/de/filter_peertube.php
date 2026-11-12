@@ -1,2 +1,2 @@
 <?php
-$string['filtername'] = 'PeerTube-Filter';
+$string['filtername'] = 'PeerTube';
