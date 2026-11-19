@@ -33,8 +33,8 @@ final class text_filter_test extends \advanced_testcase {
      * @var string[]
      */
     protected const VALID_URLS = [
-        'example1.com',
-        'example2.com',
+        'https://example1.com',
+        'https://example2.com',
     ];
 
     /**
@@ -42,7 +42,7 @@ final class text_filter_test extends \advanced_testcase {
      *
      * @var string
      */
-    protected const INVALID_URL = 'example3.com';
+    protected const INVALID_URL = 'https://example3.com';
 
     /**
      * Set up the test.
@@ -70,40 +70,43 @@ final class text_filter_test extends \advanced_testcase {
         foreach (static::VALID_URLS as $url) {
             $texts = [
                 // Bare URL in plain text.
-                'Watch https://' . $url . '/w/abc123 now'
-                    => 'Watch <iframe src="https://' . $url . '/videos/embed/abc123"></iframe> now',
+                'Watch ' . $url . '/w/abc123 now'
+                    => 'Watch <iframe src="' . $url . '/videos/embed/abc123"></iframe> now',
                 // Anchor tag with the URL as href and as link text.
-                '<a href="https://' . $url . '/w/abc123">https://' . static::INVALID_URL . '/w/abc123</a>'
-                    => '<iframe src="https://' . $url . '/videos/embed/abc123"></iframe>',
+                '<a href="' . $url . '/w/abc123">' . static::INVALID_URL . '/w/abc123</a>'
+                    => '<iframe src="' . $url . '/videos/embed/abc123"></iframe>',
                 // Anchor tag with a different link text, the whole tag is replaced.
-                '<a href="https://' . $url . '/w/abc123">Watch this video</a>'
-                    => '<iframe src="https://' . $url . '/videos/embed/abc123"></iframe>',
+                '<a href="' . $url . '/w/abc123">Watch this video</a>'
+                    => '<iframe src="' . $url . '/videos/embed/abc123"></iframe>',
                 // Anchor tag with single quotes.
-                "<a href='https://" . $url . "/w/xyz789'>link</a>"
-                    => '<iframe src="https://' . $url . '/videos/embed/xyz789"></iframe>',
+                "<a href='" . $url . "/w/xyz789'>link</a>"
+                    => '<iframe src="' . $url . '/videos/embed/xyz789"></iframe>',
                 // Anchor tag with additional attributes before href and a line break in the tag.
-                "<a class=\"video\"\n   title=\"PeerTube\"\n   href=\"https://" . $url . "/w/nl001\">some\ntext</a>"
-                    => '<iframe src="https://' . $url . '/videos/embed/nl001"></iframe>',
+                "<a class=\"video\"\n   title=\"PeerTube\"\n   href=\"" . $url . "/w/nl001\">some\ntext</a>"
+                    => '<iframe src="' . $url . '/videos/embed/nl001"></iframe>',
                 // Anchor tag with a line break inside the link text.
-                "<a href=\"https://" . $url . "/w/nl002\">line one\nline two</a>"
-                    => '<iframe src="https://' . $url . '/videos/embed/nl002"></iframe>',
+                "<a href=\"" . $url . "/w/nl002\">line one\nline two</a>"
+                    => '<iframe src="' . $url . '/videos/embed/nl002"></iframe>',
                 // Mixed content with a bare URL and an anchor tag.
-                'https://' . $url . '/w/aaa and <a href="https://' . $url . '/w/bbb">bbb</a>'
-                    => '<iframe src="https://' . $url
-                        . '/videos/embed/aaa"></iframe> and <iframe src="https://' . $url . '/videos/embed/bbb"></iframe>',
+                $url . '/w/aaa and <a href="' . $url . '/w/bbb">bbb</a>'
+                    => '<iframe src="' . $url
+                        . '/videos/embed/aaa"></iframe> and <iframe src="' . $url . '/videos/embed/bbb"></iframe>',
                 // Multiple bare URLs.
-                'https://' . $url . '/w/one https://' . $url . '/w/two'
-                    => '<iframe src="https://' . $url
-                        . '/videos/embed/one"></iframe> <iframe src="https://' . $url . '/videos/embed/two"></iframe>',
+                $url . '/w/one ' . $url . '/w/two'
+                    => '<iframe src="' . $url
+                        . '/videos/embed/one"></iframe> <iframe src="' . $url . '/videos/embed/two"></iframe>',
                 // URLs of other hosts are not touched.
-                'See https://' . static::INVALID_URL . '/w/abc123 or https://' . static::INVALID_URL . '/w/abc123'
-                    => 'See https://' . static::INVALID_URL . '/w/abc123 or https://' . static::INVALID_URL . '/w/abc123',
+                'See ' . static::INVALID_URL . '/w/abc123 or ' . static::INVALID_URL . '/w/abc123'
+                    => 'See ' . static::INVALID_URL . '/w/abc123 or ' . static::INVALID_URL . '/w/abc123',
                 // Text without any PeerTube URL stays unchanged.
                 '<p>No video here.</p>'
                     => '<p>No video here.</p>',
                 // Anchor tag of another host stays unchanged.
-                '<a href="https://' . static::INVALID_URL . '/w/abc">link</a>'
-                    => '<a href="https://' . static::INVALID_URL . '/w/abc">link</a>',
+                '<a href="' . static::INVALID_URL . '/w/abc">link</a>'
+                    => '<a href="' . static::INVALID_URL . '/w/abc">link</a>',
+                // Evil substring.
+                '<a href="' . $url . '.evildomain.com/w/abc">link</a>'
+                    => '<a href="' . $url . '.evildomain.com/w/abc">link</a>',
             ];
             $testcases += $texts;
         }

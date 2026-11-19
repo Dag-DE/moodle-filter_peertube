@@ -37,6 +37,12 @@ namespace filter_peertube;
  */
 class text_filter extends \core_filters\text_filter {
     /**
+     * Allowed sources defined in settings
+     * @var array
+     */
+    protected $peertubesources = [];
+
+    /**
      * Filters the text and replaces PeerTube links from allowed sources with iFrames via Mustache.
      *
      * @param string $text The text to be filtered.
@@ -46,8 +52,8 @@ class text_filter extends \core_filters\text_filter {
     #[\Override]
     public function filter($text, array $options = []) {
         // Process only valid strings.
-        if (!is_string($text) || empty($text)) {
-            return '';
+        if (!is_string($text) || $text === '') {
+            return ''; // Return only strings!
         }
 
         if (!$sources = $this->get_replace_sources()) {
@@ -65,6 +71,8 @@ class text_filter extends \core_filters\text_filter {
         if (!$found) {
             return $text;
         }
+
+        $this->peertubesources = $sources;
 
         $pattern = $this->get_replace_pattern($sources);
         // Replace the found urls by using the pattern and the "replace_callback" method.
@@ -95,7 +103,7 @@ class text_filter extends \core_filters\text_filter {
         if (empty($sources)) {
             return null;
         }
-        return $sources;
+        return array_map('strtolower', $sources);
     }
 
     /**
@@ -110,18 +118,18 @@ class text_filter extends \core_filters\text_filter {
     protected function get_replace_pattern(array $sources): string {
         // Dynamically create the regex pattern based on settings.
         $escapedsources = array_map(function ($source) {
-            // Remove protocol (http:// or https://) for flexible detection.
-            $source = preg_replace('#^https?://#i', '', $source);
+            // If the settings value is defined by cli there could be wrong sources with "/" at the end.
+            // So we trim the trailing slash and escape the string for regex.
             return preg_quote(rtrim($source, '/'), '#');
         }, $sources);
 
         $sourcesregex = implode('|', $escapedsources);
 
         // Pattern matches:
-        // 1. Complete <a ... href=".../w/ID">...</a> tags (Group 1 = Domain, Group 2 = ID).
-        // 2. Raw URLs (Group 3 = Domain, Group 4 = ID, Group 5 = Query params).
-        return '#<a\b[^>]*href=["\']?https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)[^"\']*["\']?[^>]*>.*?</a>|'
-        . 'https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)(\?[^<\s"]*)?#is';
+        // 1. Complete <a ... href=".../w/ID">...</a> tags (Group 1 = Host, Group 2 = ID).
+        // 2. Raw URLs (Group 3 = Host, Group 4 = ID, Group 5 = Query params).
+        return '#<a\b[^>]*href=["\']?(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)[^"\']*["\']?[^>]*>.*?</a>|'
+        . '(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)(\?[^<\s"]*)?#is';
     }
 
     /**
@@ -134,14 +142,17 @@ class text_filter extends \core_filters\text_filter {
      * @return string Rendered HTML embed code for the PeerTube video
      */
     protected function replace_callback(array $matches): string {
-        global $OUTPUT;
-
         // Support both match cases (wrapped in <a> tag vs. raw URL).
-        $domain = !empty($matches[1]) ? $matches[1] : $matches[3];
+        $host = !empty($matches[1]) ? $matches[1] : $matches[3];
         $id = !empty($matches[2]) ? $matches[2] : $matches[4];
 
+        // Check the found $host is an allowed source.
+        if (!in_array(strtolower($host), $this->peertubesources, true)) {
+            return $matches[0];
+        }
+
         // Build the embed URL dynamically matching the detected instance.
-        $embedurl = 'https://' . $domain . '/videos/embed/' . $id;
+        $embedurl = $host . '/videos/embed/' . $id;
 
         // Prepare data for the Mustache template.
         $data = [

@@ -27,12 +27,61 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-    $settings->add(
-        new admin_setting_configtextarea(
-            'filter_peertube/allowedsources',
-            get_string('allowedsourceslist', 'filter_peertube'),
-            get_string('allowedsourceslistdesc', 'filter_peertube'),
-            ''
-        )
+    $setting = new class (
+        'filter_peertube/allowedsources',
+        get_string('allowedsourceslist', 'filter_peertube'),
+        get_string('allowedsourceslistdesc', 'filter_peertube'),
+        '',
+    ) extends admin_setting_configtextarea {
+        /**
+         * Validate data before storage.
+         *
+         * @param string $data The data to validate.
+         * @return mixed true if ok string if error found
+         */
+        public function validate($data) {
+            $sources = array_filter(array_map('trim', explode("\n", $data)));
+            if (empty($sources)) {
+                return true;
+            }
+            foreach ($sources as $source) {
+                // Predefine the error string.
+                $errorstring = get_string('settings_error_invalidhost', 'filter_peertube', $source);
+
+                // Check if the source starts with https:// and is a valid domain name.
+                if (!str_starts_with($source, 'https://')) {
+                    return $errorstring;
+                }
+                $host = substr($source, 8);
+
+                if (!filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+                    return $errorstring;
+                }
+            }
+            return true;
+        }
+    };
+
+    $setting->set_updatedcallback(
+        /**
+         * Cleans and normalizes the allowed sources configuration.
+         *
+         * Retrieves the 'allowedsources' setting for the filter_peertube plugin, splits it
+         * by newlines, trims whitespace from each entry, and removes empty values. If valid
+         * sources remain, they are saved back as a newline-separated string; otherwise the
+         * configuration is left unchanged.
+         *
+         * @return void
+         */
+        function () {
+            $data = get_config('filter_peertube', 'allowedsources');
+            $sources = array_filter(array_map('trim', explode("\n", $data)));
+            if (empty($sources)) {
+                return;
+            }
+            set_config('allowedsources', implode("\n", $sources), 'filter_peertube');
+        }
     );
+
+    $settings->add($setting);
 }

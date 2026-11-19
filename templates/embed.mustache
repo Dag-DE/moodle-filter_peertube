@@ -23,7 +23,7 @@
 
     Example context (json):
     {
-        "embedurl": "https://peertube.example.com/videos"
+        "embedurl": "https://peertube.example.com/videos/embed/12345"
     }
 }}
 
@@ -33,9 +33,10 @@
     <div style="position: relative; width: 100%; max-width: 640px; margin: 0 auto; aspect-ratio: 16 / 9;">
         {{! Iframe element embedding the video with secure sandbox permissions and fullscreen support. }}
         <iframe style="border: 0px; position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
-                title="PeerTube Video"
+                title="{{#str}}iframetitle, filter_peertube{{/str}}"
                 src="{{embedurl}}"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-popups"
                 allow="fullscreen"></iframe>
     </div>
 </div>

@@ -27,3 +27,6 @@
 $string['allowedsourceslist'] = 'Allowed sources';
 $string['allowedsourceslistdesc'] = 'A list of URLs from which users can embed PeerTube content. Enter only the protocol and domain (e.g. [https://peertube.domain.xyz]). If none are specified, all URLs will remain as links and not be displayed as embedded PeerTube content.';
 $string['filtername'] = 'PeerTube';
+$string['iframetitle'] = 'PeerTube Video';
+$string['privacy:metadata'] = 'The PeerTube filter plugin does not store any personal data.';
+$string['settings_error_invalidhost'] = 'Found invalid host "{$a}" Note: Only valid hosts with "https://" are allowed. Example: https://peertube.example.com';
