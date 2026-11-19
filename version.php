@@ -29,4 +29,4 @@ $plugin->component = 'filter_peertube';
 $plugin->version   = 2026111900;      // YYYYMMDDXX.
 $plugin->requires  = 2026100200;      // Moodle version requirement.
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '0.4';
+$plugin->release   = 'v0.4';
