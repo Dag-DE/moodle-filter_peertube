@@ -18,23 +18,24 @@
  * Main class for the PeerTube filter.
  *
  * @package    filter_peertube
- * @copyright  2026 onwards
+ * @copyright  2026 Dag Klimas
+ * @author     Dag Klimas <moodle@dag-klimas.de>
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace filter_peertube;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Text filter class for PeerTube videos.
  *
  * @package    filter_peertube
- * @copyright  2026 onwards
+ * @copyright  2026 Dag Klimas
+ * @author     Dag Klimas <moodle@dag-klimas.de>
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class text_filter extends \core_filters\text_filter {
-
     /**
      * Filters the text and replaces PeerTube links from allowed sources with iFrames via Mustache.
      *
@@ -42,6 +43,7 @@ class text_filter extends \core_filters\text_filter {
      * @param array $options Additional options for the filter.
      * @return string The filtered text.
      */
+    #[\Override]
     public function filter($text, array $options = []) {
         // Process only valid strings.
         if (!is_string($text) || empty($text)) {
@@ -107,7 +109,7 @@ class text_filter extends \core_filters\text_filter {
      */
     protected function get_replace_pattern(array $sources): string {
         // Dynamically create the regex pattern based on settings.
-        $escapedsources = array_map(function($source) {
+        $escapedsources = array_map(function ($source) {
             // Remove protocol (http:// or https://) for flexible detection.
             $source = preg_replace('#^https?://#i', '', $source);
             return preg_quote(rtrim($source, '/'), '#');
@@ -116,9 +118,10 @@ class text_filter extends \core_filters\text_filter {
         $sourcesregex = implode('|', $escapedsources);
 
         // Pattern matches:
-        // 1. Complete <a ... href=".../w/ID">...</a> tags (Group 1 = Domain, Group 2 = ID)
-        // 2. Raw URLs (Group 3 = Domain, Group 4 = ID, Group 5 = Query params)
-        return '#<a\b[^>]*href=["\']?https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)[^"\']*["\']?[^>]*>.*?</a>|https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)(\?[^<\s"]*)?#i';
+        // 1. Complete <a ... href=".../w/ID">...</a> tags (Group 1 = Domain, Group 2 = ID).
+        // 2. Raw URLs (Group 3 = Domain, Group 4 = ID, Group 5 = Query params).
+        return '#<a\b[^>]*href=["\']?https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)[^"\']*["\']?[^>]*>.*?</a>|'
+        . 'https?://(' . $sourcesregex . ')/w/([A-Za-z0-9_-]+)(\?[^<\s"]*)?#is';
     }
 
     /**
@@ -144,6 +147,18 @@ class text_filter extends \core_filters\text_filter {
         $data = [
             'embedurl' => $embedurl,
         ];
+
+        return $this->get_html_from_template($data);
+    }
+
+    /**
+     * Get the html from template using the $data value.
+     *
+     * @param array $data
+     * @return bool|string
+     */
+    protected function get_html_from_template(array $data): string {
+        global $OUTPUT;
 
         // Render template ('filter_peertube' is the component, 'embed' is the template name).
         return $OUTPUT->render_from_template('filter_peertube/embed', $data);

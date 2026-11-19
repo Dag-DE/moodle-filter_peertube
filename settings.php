@@ -18,7 +18,9 @@
  * Display PeerTube filter settings.
  *
  * @package    filter_peertube
- * @copyright  2026 onwards
+ * @copyright  2026 Dag Klimas
+ * @author     Dag Klimas <moodle@dag-klimas.de>
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -18,14 +18,15 @@
  * Version details.
  *
  * @package    filter_peertube
- * @copyright  2025 onwards
+ * @copyright  2026 Dag Klimas
+ * @author     Dag Klimas <moodle@dag-klimas.de>
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
 $plugin->component = 'filter_peertube';
-$plugin->version   = 2026111000;      // YYYYMMDDXX.
-$plugin->requires  = 2024100700;      // Moodle version requirement.
-$plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.3';
+$plugin->version   = 2026111900;      // YYYYMMDDXX.
+$plugin->requires  = 2026100200;      // Moodle version requirement.
+$plugin->maturity  = MATURITY_BETA;
+$plugin->release   = '0.4';
